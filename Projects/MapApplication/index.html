@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tourism Point of Interest</title>
+        <style>
+    #map {
+        height: 500px;
+        width: 800px;
+    }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="marker">
+    <h3>Add a Marker</h3>
+    <form id="markerForm">
+        <label>Address: <input type="text" id="address" required ></label><br>
+        <label>Title: <input type="text" id="title" ></label><br>
+        <label>Description:<br><textarea id="desc" rows="3" cols="40"></textarea></label><br>
+        <label>Website: <input type="url" id="website" ></label><br>
+        <label>Category:
+            <select id="category">
+                <option>Accommodations</option>
+                <option>Art Galleries</option>
+                <option>Attractions</option>
+                <option>Countryside</option>
+                <option>Farmers' Market</option>
+                <option>Farms</option>
+                <option>Museums</option>
+                <option>Outdoors</option>
+                <option>Performing Arts</option>
+                <option>Shopping</option>
+                <option>Sports and Recreation</option>
+                <option>Waterfalls</option>
+            </select>
+        </label><br>
+        <button type="submit" id="submit">Add Marker</button>
+    </form>
+</div>
+<div><button id="museum">Show Museums</button></div>
+<div><button id="waterfalls">Show Waterfalls</button></div>
+<div><button id="countryside">Show Countryside</button></div>
+<div><button id="all">Show All</button></div>
+<div><button id="geolocation">GeoLocation</button></div>
+<script src="Tourism.js"></script>
+<script
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJj3Jt-rTfWRZm3deOVsV7xbx_eHLF9nM&callback=initMap&v=weekly&libraries=marker"
+defer
+></script>
+<script>
+    let map;
+    let markers=[];
+    function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: 43.2387, lng: -79.881 },
+            zoom: 12,
+            mapId:"a33ad591e9e72e72abcd1a00"
+        });
+        const geocoder = new google.maps.Geocoder();
+        function addingMarker(evt){
+            if(evt && evt.preventDefault) evt.preventDefault();
+        const new_icon=document.createElement("img");
+        new_icon.src="http://maps.google.com/mapfiles/kml/pushpin/red-pushpin.png";
+        const address=document.getElementById("address").value;
+        const title=document.getElementById("title").value;
+        const description=document.getElementById("desc").value;
+        const website=document.getElementById("website").value;
+        const category=document.getElementById("category").value;
+        
+        geocoder.geocode({address:address},function(results,status){
+            if(status==="OK"){
+                const latitude=results[0].geometry.location.lat();
+                const longitude=results[0].geometry.location.lng();
+                const new_marker=new google.maps.marker.AdvancedMarkerElement({
+                    position: { lat: latitude, lng: longitude },
+                    map:map,
+                    title: title || address,
+                    content:new_icon
+                });
+                
+                new_marker.CATEGORY = category;
+                new_marker.ADDRESS = address;
+                new_marker.WEBSITE = website;
+                new_marker.NAME = title || address;
+                new_marker.DESCRIPTION = description;
+                new_marker.addListener("click", markerClicked);
+                markers.push(new_marker);
+            }else{
+                alert("Geocode was not successful for the following reason: " + status);
+            }
+        });
+    }
+     
+const submit=document.getElementById("submit");
+submit.addEventListener("click", addingMarker);
+
+
+        const infoWindow = new google.maps.InfoWindow();
+
+        function markerClicked(){
+            const contentString=`<h1>${this.NAME}</h1><p>${this.DESCRIPTION}</p><p>Address: ${this.ADDRESS}</p><a href="${this.WEBSITE}" target="_blank">Visit Website</a>`;
+            
+            infoWindow.close();
+            infoWindow.setContent(contentString);
+            infoWindow.open(map,this);
+        }
+    
+        for(let i=0;i<tourism.features.length;i++){
+                        if(tourism.features[i].properties.CATEGORY=="Accommodations"){
+                icon="http://maps.google.com/mapfiles/kml/pal3/icon56.png";
+            }else if(tourism.features[i].properties.CATEGORY=="Attractions"){
+                icon="https://maps.google.com/mapfiles/kml/pal4/icon38.png";
+            }else if(tourism.features[i].properties.CATEGORY=="Art Galleries"){
+                icon="http://maps.google.com/mapfiles/kml/pal2/icon15.png";
+            }else if(tourism.features[i].properties.CATEGORY=="Museums"){
+                icon="http://maps.google.com/mapfiles/kml/pal2/icon5.png";
+            }else if(tourism.features[i].properties.CATEGORY=="Countryside"){
+                icon="https://maps.google.com/mapfiles/kml/pal2/icon12.png";
+            }else if(tourism.features[i].properties.CATEGORY=="Farms"){
+                icon="https://maps.google.com/mapfiles/kml/pal2/icon12.png";
+            }else if(tourism.features[i].properties.CATEGORY=="Farmers' Markets"){
+                icon="https://maps.google.com/mapfiles/kml/pal2/icon12.png";
+            }else if(tourism.features[i].properties.CATEGORY=="Outdoors"){
+                icon="https://maps.google.com/mapfiles/kml/pal3/icon29.png";
+            }else if(tourism.features[i].properties.CATEGORY=="Shopping"){
+                icon="https://maps.google.com/mapfiles/kml/pal2/icon59.png";
+            }else if(tourism.features[i].properties.CATEGORY=="Sports and Recreation"){
+                icon="http://maps.google.com/mapfiles/kml/pal2/icon57.png";
+            }else if(tourism.features[i].properties.CATEGORY=="Waterfalls"){
+                icon="https://maps.google.com/mapfiles/kml/pal3/icon29.png";
+            }
+            else{
+                icon="http://maps.google.com/mapfiles/kml/pal3/icon55.png";
+            }
+            const new_icon=document.createElement("img");
+            new_icon.src=icon;
+
+
+            new_marker=new google.maps.marker.AdvancedMarkerElement({
+                position: { lat: tourism.features[i].geometry.coordinates[1], lng: tourism.features[i].geometry.coordinates[0] },
+                map:map,
+                title: tourism.features[i].properties.TITLE,
+                content:new_icon
+                
+            });
+            new_marker.CATEGORY=tourism.features[i].properties.CATEGORY;
+            new_marker.ADDRESS=tourism.features[i].properties.ADDRESS;
+            new_marker.WEBSITE=tourism.features[i].properties.URL;
+            new_marker.NAME=tourism.features[i].properties.TITLE;
+            new_marker.DESCRIPTION=tourism.features[i].properties.DESCRIPTION;
+            new_marker.addListener("click", markerClicked);
+            markers.push(new_marker);
+        }
+    }
+    function filtermuseum(){
+        for(let i=0;i<markers.length;i++){
+            if(markers[i].CATEGORY=="Museums"){
+                markers[i].setMap(map);
+            }else{
+                markers[i].setMap(null);
+            }
+        }
+    }
+    function filterwaterfalls(){
+        for(let i=0;i<markers.length;i++){
+            if(markers[i].CATEGORY=="Waterfalls"){
+                markers[i].setMap(map);
+            }else{
+                markers[i].setMap(null);
+            }
+        }
+    }
+    function filtercountryside(){
+        for(let i=0;i<markers.length;i++){
+            if(markers[i].CATEGORY=="Countryside"){
+                markers[i].setMap(map);
+            }else{
+                markers[i].setMap(null);
+            }
+        }
+    }
+    function filterall(){
+        for(let i=0;i<markers.length;i++){
+            markers[i].setMap(map);
+        }
+    }
+    function success(position) {
+        const latitude  = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const new_icon=document.createElement("img");
+
+        new_icon.src="http://maps.google.com/mapfiles/kml/pushpin/red-pushpin.png";
+
+         new google.maps.marker.AdvancedMarkerElement({
+            position: { lat: latitude, lng: longitude },
+            map:map,
+            title: "You are here!",
+            content:new_icon
+        });
+    }
+    function geoLocation(){
+        navigator.geolocation.getCurrentPosition(success);
+    }
+
+    const museum=document.getElementById("museum");
+    museum.addEventListener("click", filtermuseum)
+    const waterfalls=document.getElementById("waterfalls");
+    waterfalls.addEventListener("click", filterwaterfalls)
+    const countryside=document.getElementById("countryside");
+    countryside.addEventListener("click", filtercountryside)
+    const all=document.getElementById("all");
+    all.addEventListener("click", filterall)
+    const geolocation=document.getElementById("geolocation");
+    geolocation.addEventListener("click",geoLocation);
+   
+        
+</script>
+    
+</body>
+</html>
